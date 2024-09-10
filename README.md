@@ -18,7 +18,7 @@ Welcome to the **Tour Guider Web Application**! This platform connects travelers
 - **Frontend**: HTML, CSS, JavaScript
 - **Backend & Database**: Firebase (Authentication, Firestore Database, Hosting)
 - **APIs**: Integration with various APIs for location and travel information
-- **Responsive Design**: Fully responsive layout to support all devices
+- Deployed on netlify
 
 ## Getting Started
 

@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tour Guider</title>
+    <link rel="stylesheet" href="nearbyLocation.css">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Irish+Grover" />
+</head>
+
+<body>
+
+    <!-- Navbar Section -->
+    <nav class="navbar">
+        <div class="logohh">
+            <a href="index.html"><img src="logo.png" alt="Logo"></a>
+        </div>
+
+        <ul class="nav-links">
+            <li> <a href="menu.html"><i class='bx bx-menu'></i></a> </li>
+            <li><a class="menu" href="menu.html">MENU</a></li>
+            <li><a class="community" href="community.html">COMMUNITY</a></li>
+            <li><a class="budgetP" href="#">BUDGET PLANNER</a></li>
+
+        </ul>
+        <div class="profile">
+            <div><img src="user-solid-24.png" alt="Notifications" class="bell-icon"></div>
+            <div><img src="bell-regular-24.png" alt="Profile" class="profile-icon"></div>
+        </div>
+    </nav>
+
+    <!-- Main Content Section -->
+    <main class="main-content">
+        <div class="search-section">
+            <h1>NEARBY LOCATION LIST</h1>
+            <div id="location-list" class="loc"></div>
+        </div>
+    </main>
+
+    <!-- JavaScript -->
+    <script>
+        // Function to get query parameters
+        function getQueryParam(param) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(param);
+        }
+
+        // Get the lat and lon from the URL
+        const lat = getQueryParam('lat');
+        const lon = getQueryParam('lon');
+
+        if (lat && lon) {
+            // Fetch nearby tourist places using Overpass API
+            fetchTouristPlaces(lat, lon);
+        } else {
+            document.getElementById('location-list').innerHTML = '<p>No location data provided.</p>';
+        }
+
+        function fetchTouristPlaces(lat, lon) {
+            // Overpass API query to fetch tourist attractions within 5000 meters (5 km)
+            const query = `
+                [out:json][timeout:25];
+                (
+                  node["tourism"~"attraction|museum|gallery|zoo|theme_park|viewpoint"](around:5000,${lat},${lon});
+                  way["tourism"~"attraction|museum|gallery|zoo|theme_park|viewpoint"](around:5000,${lat},${lon});
+                  relation["tourism"~"attraction|museum|gallery|zoo|theme_park|viewpoint"](around:5000,${lat},${lon});
+
+                  node["historic"](around:5000,${lat},${lon});
+                  way["historic"](around:5000,${lat},${lon});
+                  relation["historic"](around:5000,${lat},${lon});
+                );
+                out center ${20};  // Limit to 20 results
+            `;
+
+            const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`;
+
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    displayTouristPlaces(data.elements);
+                })
+                .catch(error => {
+                    console.error('Error fetching tourist places:', error);
+                    document.getElementById('location-list').innerHTML = '<p>Error fetching tourist places.</p>';
+                });
+        }
+
+        function displayTouristPlaces(places) {
+            const locationList = document.getElementById('location-list');
+            locationList.innerHTML = ''; // Clear previous results
+
+            if (places.length === 0) {
+                locationList.innerHTML = '<p>No tourist places found nearby.</p>';
+                return;
+            }
+
+            places.forEach(place => {
+                const name = place.tags && place.tags.name ? place.tags.name : 'Unnamed Place';
+                const type = place.tags && place.tags.tourism ? place.tags.tourism :
+                             place.tags && place.tags.historic ? place.tags.historic : 'Tourist Attraction';
+                const distance = getDistanceFromLatLonInKm(lat, lon, place.lat || place.center.lat, place.lon || place.center.lon).toFixed(2);
+
+                locationList.innerHTML += `
+                    <div class="place-item">
+                        <h3>${name}</h3>
+                        <p>Type: ${type}</p>
+                        <p>Distance: ${distance} km</p>
+                    </div>
+                `;
+            });
+        }
+
+        // Function to calculate distance between two coordinates using Haversine formula
+        function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
+            const R = 6371; // Radius of the earth in km
+            const dLat = deg2rad(lat2 - lat1);
+            const dLon = deg2rad(lon2 - lon1);
+            const a =
+                Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
+                Math.sin(dLon / 2) * Math.sin(dLon / 2)
+                ;
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            const d = R * c; // Distance in km
+            return d;
+        }
+
+        function deg2rad(deg) {
+            return deg * (Math.PI / 180);
+        }
+    </script>
+</body>
+
+</html>

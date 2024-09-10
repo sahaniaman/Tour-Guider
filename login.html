@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tour Guider</title>
+    <link rel="stylesheet" href="login.css">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Irish+Grover" />
+</head>
+
+<body>
+    <!-- Navbar Section -->
+    <nav class="navbar">
+        <div class="logohh">
+            <a href="index.html"><img src="logo.png" alt="Logo"></a>
+        </div>
+        <ul id="nav-links" class="nav-links">
+            <li><a href="menu.html"><i class='bx bx-menu'></i></a></li>
+            <li><a class="menu" href="menu.html">MENU</a></li>
+            <li><a class="community" href="community.html">COMMUNITY</a></li>
+            <li><a class="budgetP" href="#">BUDGET PLANNER</a></li>
+        </ul>
+        <div class="profile">
+            <!-- Display username here -->
+            <div><img src="bell-regular-24.png" alt="Profile" class="profile-icon"></div>
+        </div>
+    </nav>
+
+    <!-- Main Content Section -->
+    <main class="main_signup">
+        <div class="sign_up">
+            <h1>Sign-In</h1>
+            <button class="google_btn">Sign in with Google</button>
+            <h3>OR</h3>
+            <div class="form_signup">
+                <form action="#">
+                    <input type="email" name="Email" placeholder="Email" required>
+                    <input type="password" name="password" placeholder="Password" required>
+                    <button id="signin_btn" class="signin_btn">Sign In</button>
+                    <p>Don't have an account? <a href="signup.html">Signup Here</a></p>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Retrieve and display username from local storage
+        document.addEventListener('DOMContentLoaded', () => {
+            const usernameDisplay = document.getElementById('username-display');
+            const username = localStorage.getItem('username');
+
+            if (username) {
+                usernameDisplay.textContent = `Hello, ${username}!`;
+            } else {
+                usernameDisplay.textContent = 'Hello, Guest!';
+            }
+        });
+    </script>
+
+    <!-- Firebase Scripts -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-auth.js";
+        import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-database.js";
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAjPI9yWXxcgHo6jMM8s0e2LdubN7eS6jQ",
+            authDomain: "tour-guider-6777a.firebaseapp.com",
+            projectId: "tour-guider-6777a",
+            storageBucket: "tour-guider-6777a.appspot.com",
+            messagingSenderId: "788459523893",
+            appId: "1:788459523893:web:db58b0b6b233eac58d067c"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+        const provider = new GoogleAuthProvider();
+
+        // Sign In with Email and Password
+        document.getElementById('signin_btn').addEventListener('click', async (e) => {
+            e.preventDefault();
+
+            const email = document.querySelector('input[name="Email"]').value.trim();
+            const password = document.querySelector('input[name="password"]').value.trim();
+
+            if (!email || !password) {
+                alert('Please enter both email and password.');
+                return;
+            }
+
+            try {
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+                const uid = user.uid;
+                const userRef = ref(db, 'users/' + uid);
+
+                const snapshot = await get(userRef);
+                if (snapshot.exists()) {
+                    const userData = snapshot.val();
+                    localStorage.setItem('username', userData.username);
+                    localStorage.setItem('email', user.email);
+                    alert('Welcome! Login Successful');
+                    window.location.href = 'index.html'; // Redirect to home page
+                } else {
+                    console.log("No data available");
+                    alert('No user data found.');
+                }
+            } catch (error) {
+                const errorMessage = error.message;
+                console.log(errorMessage);
+                alert('Login failed: ' + errorMessage);
+            }
+        });
+
+        // Sign In with Google
+        document.querySelector('.google_btn').addEventListener('click', async () => {
+            try {
+                const result = await signInWithPopup(auth, provider);
+                const user = result.user;
+                const uid = user.uid;
+                const userRef = ref(db, 'users/' + uid);
+                const snapshot = await get(userRef);
+
+                if (snapshot.exists()) {
+                    const userData = snapshot.val();
+                    localStorage.setItem('username', userData.username);
+                    localStorage.setItem('email', user.email);
+                } else {
+                    localStorage.setItem('username', user.displayName || 'User');
+                }
+
+                alert('Signed in with Google');
+                window.location.href = 'index.html'; // Redirect to home page
+            } catch (error) {
+                const errorMessage = error.message;
+                alert(`Error: ${errorMessage}`);
+            }
+        });
+    </script>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
+
+

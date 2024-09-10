@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tour Guider</title>
+    <link rel="stylesheet" href="page1.css">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Irish+Grover">
+</head>
+
+<body>
+
+    <!-- Navbar Section -->
+    <nav class="navbar">
+        <div class="logohh">
+            <a href="index.html"><img src="logo.png" alt="Logo"></a>
+        </div>
+
+        <ul class="nav-links">
+            <li> <a href="menu.html"><i class='bx bx-menu'></i></a> </li>
+            <li><a class="menu" href="menu.html">MENU</a></li>
+            <li><a class="community" href="community.html">COMMUNITY</a></li>
+            <li><a class="budgetP" href="#">BUDGET PLANNER</a></li>
+        </ul>
+        <div class="profile">
+            <!-- Display username here -->
+            <div><p id="username-display">Loading...</p></div>
+            <div><img src="bell-regular-24.png" alt="Profile" class="profile-icon"></div>
+        </div>
+    </nav>
+
+    <!-- Main Content Section -->
+    <main class="main-content">
+        <div class="selection-buttons">
+            <button onclick="location.href='nearby.html'">Nearby Locations</button>
+            <button onclick="location.href='services.html'">Services</button>
+            <button onclick="location.href='budget-planner.html'">Budget Planner</button>
+        </div>
+
+        <div class="main_page1">
+            <button class="budget_planner" onclick="location.href='budget-planner.html'">
+                <div>
+                    <h1>Budget Planner</h1>
+                    <p>Click here to plan your budget.</p>
+                </div>
+            </button>
+
+            <button class="services" onclick="location.href='page1.html'">
+                <div>
+                    <h1>SERVICES</h1>
+                    <p>Click here for our services.</p>
+                </div>
+            </button>
+
+            <button class="nearby" onclick="location.href='nearbyLocation.html'">
+                <div>
+                    <h1>Nearby Locations</h1>
+                    <p>Details .......</p>
+                </div>
+            </button>
+        </div>
+    </main>
+
+    <script>
+        // Display username from local storage
+        document.addEventListener('DOMContentLoaded', () => {
+            const usernameDisplay = document.getElementById('username-display');
+            const username = localStorage.getItem('username');
+
+            if (username) {
+                usernameDisplay.textContent = `Hello, ${username}!`;
+            } else {
+                usernameDisplay.textContent = 'Hello, Guest!';
+            }
+        });
+    </script>
+</body>
+
+</html>

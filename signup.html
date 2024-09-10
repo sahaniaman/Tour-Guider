@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tour Guider</title>
+    <link rel="stylesheet" href="signup.css">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Irish+Grover" />
+</head>
+
+<body>
+    <!-- Navbar Section -->
+    <nav class="navbar">
+        <div class="logohh">
+            <a href="index.html"><img src="logo.png" alt="Logo"></a>
+        </div>
+        <ul class="nav-links">
+            <li> <a href="menu.html"><i class='bx bx-menu'></i></a> </li>
+            <li><a class="menu" href="menu.html">MENU</a></li>
+            <li><a class="community" href="community.html">COMMUNITY</a></li>
+            <li><a class="budgetP" href="#">BUDGET PLANNER</a></li>
+        </ul>
+        <div class="profile">
+            <div><img src="user-solid-24.png" alt="Notifications" class="bell-icon"></div>
+            <div><img src="bell-regular-24.png" alt="Profile" class="profile-icon"></div>
+        </div>
+    </nav>
+
+    <!-- Main Content Section -->
+    <main class="main_signup">
+        <div class="sign_up">
+            <h1>Create Account</h1>
+            <button class="google_btn">Sign Up with Google</button>
+            <h3>OR</h3>
+            <div class="form_signup">
+                <form action="#">
+                    <input type="text" name="Name" placeholder="Full Name" required>
+                    <input type="email" name="Email" placeholder="Your Email" required>
+                    <input type="password" name="password" placeholder="Password" required>
+                    <button id="signup_btn" class="signup_btn">Create Account</button>
+                    <p>If you have an account? <a href="login.html">Login Here</a></p>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <!-- Firebase Scripts -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js';
+        import { getAuth, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js';
+        import { getDatabase, ref, set } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js';
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAjPI9yWXxcgHo6jMM8s0e2LdubN7eS6jQ",
+            authDomain: "tour-guider-6777a.firebaseapp.com",
+            projectId: "tour-guider-6777a",
+            storageBucket: "tour-guider-6777a.appspot.com",
+            messagingSenderId: "788459523893",
+            appId: "1:788459523893:web:db58b0b6b233eac58d067c"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const provider = new GoogleAuthProvider();
+        const db = getDatabase(app);
+
+        // Sign Up function
+        document.querySelector('.signup_btn').addEventListener('click', async (e) => {
+            e.preventDefault();
+            const name = document.querySelector('input[name="Name"]').value.trim();
+            const email = document.querySelector('input[name="Email"]').value.trim();
+            const password = document.querySelector('input[name="password"]').value.trim();
+
+            if (!name || !email || !password) {
+                alert('Please fill in all fields.');
+                return;
+            }
+
+            try {
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+                const uid = user.uid;
+
+                // Store additional user info in the database
+                await set(ref(db, 'users/' + uid), {
+                    username: name,
+                    email: email
+                });
+
+                alert('Account created successfully');
+                window.location.href = 'login.html'; // Redirect to login page
+            } catch (error) {
+                const errorMessage = error.message;
+                alert(`Error: ${errorMessage}`);
+            }
+        });
+
+        // Google Sign-Up function
+        document.querySelector('.google_btn').addEventListener('click', async () => {
+            try {
+                const result = await signInWithPopup(auth, provider);
+                // Signed in successfully
+                alert('Signed up with Google');
+                window.location.href = 'dashboard.html'; // Redirect to a different page if needed
+            } catch (error) {
+                const errorMessage = error.message;
+                alert(`Error: ${errorMessage}`);
+            }
+        });
+    </script>
+
+    <script src="script.js"></script>
+</body>
+
+</html>

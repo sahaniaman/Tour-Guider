@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tour Guider</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Irish+Grover" />
+</head>
+
+<body>
+
+    <!-- Navbar Section -->
+    <nav class="navbar">
+        <div class="logohh">
+            <a href="index.html"><img src="logo.png" alt="Logo"></a>
+        </div>
+
+        <ul class="nav-links">
+            <li> <a href="menu.html"><i class='bx bx-menu'></i></a> </li>
+            <li><a class="menu" href="menu.html">MENU</a></li>
+            <li><a class="community" href="community.html">COMMUNITY</a></li>
+            <li><a class="budgetP" href="#">BUDGET PLANNER</a></li>
+        </ul>
+        <div class="profile">
+            <div>
+                <a href="signup.html"> <img src="user-solid-24.png" alt="Notifications" class="bell-icon"></div>
+            </a>
+            <div><img src="bell-regular-24.png" alt="Profile" class="profile-icon"></div>
+            <!-- <img src="logo.png" alt="Notifications" class="bell-icon">
+            <img src="logo.png" alt="Profile" class="profile-icon"> -->
+        </div>
+    </nav>
+
+    <!-- Main Content Section -->
+    <main class="main-content">
+        <div class="search-section">
+            <h1>SEARCH YOUR LOCATION</h1>
+
+            <input type="text" placeholder="Search Your Location" id="location-input">
+            <i class='bx bxs-edit-location'></i>
+
+        </div>
+        <p class="quote">Live Every Moment As If It Is Your Last!!</p>
+    </main>
+
+    <!-- Chatbot Assistant -->
+    <div class="chatbot-assistant">
+        <h3>Chatbot Assistant</h3>
+        <div class="Assistant_logo"><img src="background.jpg" alt="Notifications"></div>
+        <p>How can I help you today?</p>
+        <textarea id="chatbot-input" placeholder="Please enter your query here..."></textarea>
+        <div class="chatbot-buttons">
+            <button onclick="clearChatbot()">Cancel</button>
+            <button onclick="submitChatbot()">Submit</button>
+        </div>
+    </div>
+
+    <div class="menu_cont">
+        <div>
+            <a href="index.html">Home</a>
+
+        </div>
+        <div>
+
+            <a href="services.html">Services</a>
+
+        </div>
+
+        <div>
+            <a href="cCAF.html">Contact Us</a>
+
+        </div>
+        <div>
+            <a href="CAF.html">Feedback</a>
+
+        </div>
+        <div>
+            <a href="CAF.html">About Us</a>
+
+        </div>
+
+        <div>
+            <a href="index.html">Close</a>
+
+        </div>
+
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>

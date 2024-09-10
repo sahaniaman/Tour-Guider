@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tour Guider</title>
+    <link rel="stylesheet" href="community.css">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Irish+Grover">
+</head>
+
+<body>
+
+    <!-- Navbar Section -->
+    <nav class="navbar">
+        <div class="logohh">
+            <a href="index.html"><img src="logo.png" alt="Logo"></a>
+        </div>
+        <ul class="nav-links">
+            <li><a href="#"><i class='bx bx-menu'></i></a></li>
+            <li><a class="menu" href="#">Home</a></li>
+        </ul>
+
+        <div class="searchcom">
+            <input type="text" placeholder="Search">
+        </div>
+
+        <div class="profile">
+            <!-- Display username here -->
+            <div>
+                <p id="username-display">Hello, Guest!</p>
+                <!-- <img src="user-solid-24.png" alt="Notifications" class="bell-icon"> -->
+            </div>
+            <div><img src="bell-regular-24.png" alt="Profile" class="profile-icon"></div>
+        </div>
+    </nav>
+
+    <!-- Main Content Section -->
+    <main class="main-com">
+        <div id="postsList" class="com_contain"></div>
+    </main>
+
+    <div class="ask">
+        <p>What do you want to ask or share?</p>
+        <div class="ask_cont">
+            <input type="text" placeholder="Write" id="postContent">
+            <div>
+                <button class="ask_btn" onclick="addPost()">Ask</button>
+                <button class="post_btn" onclick="addPost()">Post</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase and JavaScript -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-app.js";
+        import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, getDocs, updateDoc, doc, getDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAjPI9yWXxcgHo6jMM8s0e2LdubN7eS6jQ",
+            authDomain: "tour-guider-6777a.firebaseapp.com",
+            projectId: "tour-guider-6777a",
+            storageBucket: "tour-guider-6777a.appspot.com",
+            messagingSenderId: "788459523893",
+            appId: "1:788459523893:web:db58b0b6b233eac58d067c"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const firestore = getFirestore(app);
+
+        // Function to add a new post
+        window.addPost = async function() {
+            const content = document.getElementById('postContent').value;
+            if (content === "") {
+                alert("Post content cannot be empty!");
+                return;
+            }
+
+            try {
+                const postsRef = collection(firestore, 'posts');
+                await addDoc(postsRef, {
+                    content: content,
+                    likes: 0,
+                    poster: "Unknown" // Can be dynamic
+                });
+                document.getElementById('postContent').value = "";  // Clear input
+                fetchPosts();  // Refresh the post list
+            } catch (error) {
+                console.error("Error adding post: ", error);
+            }
+        };
+
+        // Function to fetch and display posts
+        window.fetchPosts = async function() {
+            const postsList = document.getElementById('postsList');
+            postsList.innerHTML = "";  // Clear existing posts
+            const postsRef = collection(firestore, 'posts');
+            const querySnapshot = await getDocs(postsRef);
+
+            querySnapshot.forEach((doc) => {
+                const post = doc.data();
+                postsList.innerHTML += `
+                    <div class="com_list">
+                        <div class="list_content">
+                            <img src="logo.png" alt="">
+                            <div>
+                                <h3>${post.poster}</h3>
+                                <p>Poster ${post.poster}</p>
+                            </div>
+                        </div>
+                        <div class="list_txt">
+                            <h2>${post.content}</h2>
+                            <button class="answer_btn" onclick="likePost('${doc.id}', ${post.likes})">
+                                <i class='bx bx-like'></i> Like (${post.likes})
+                            </button>
+                            <button class="answer_btn" onclick="dislikePost('${doc.id}', ${post.likes})">
+                                <i class='bx bx-dislike'></i> Dislike (${post.likes})
+                            </button>
+                            <button class="reply_btn" onclick="showReplyInput('${doc.id}')">
+                                <i class='bx bx-reply'></i> Reply
+                            </button>
+                            <div id="replyInput-${doc.id}" class="reply-input" style="display: none;">
+                                <input type="text" id="replyContent-${doc.id}" placeholder="Write a reply">
+                                <button onclick="addReply('${doc.id}')">Submit Reply</button>
+                            </div>
+                            <div id="replies-${doc.id}" class="replies"></div>
+                        </div>
+                    </div>
+                `;
+                fetchReplies(doc.id);
+            });
+        };
+
+        // Function to show reply input
+        window.showReplyInput = function(postId) {
+            const replyInput = document.getElementById(`replyInput-${postId}`);
+            replyInput.style.display = replyInput.style.display === 'none' ? 'block' : 'none';
+        };
+
+        // Function to add a reply
+        window.addReply = async function(postId) {
+            const replyContent = document.getElementById(`replyContent-${postId}`).value;
+            if (replyContent === "") {
+                alert("Reply content cannot be empty!");
+                return;
+            }
+            try {
+                const repliesRef = collection(firestore, 'posts', postId, 'replies');
+                await addDoc(repliesRef, {
+                    content: replyContent,
+                    poster: "Unknown" // Can be dynamic
+                });
+                document.getElementById(`replyContent-${postId}`).value = "";  // Clear input
+                fetchReplies(postId);  // Refresh the replies list
+            } catch (error) {
+                console.error("Error adding reply: ", error);
+            }
+        };
+
+        // Function to fetch and display replies
+        window.fetchReplies = async function(postId) {
+            const repliesList = document.getElementById(`replies-${postId}`);
+            repliesList.innerHTML = "";  // Clear existing replies
+            const repliesRef = collection(firestore, 'posts', postId, 'replies');
+            const querySnapshot = await getDocs(repliesRef);
+
+            querySnapshot.forEach((doc) => {
+                const reply = doc.data();
+                repliesList.innerHTML += `
+                    <div class="reply">
+                        <p><strong>${reply.poster}:</strong> ${reply.content}</p>
+                    </div>
+                `;
+            });
+        };
+
+        // Fetch posts on page load
+        window.onload = fetchPosts;
+
+        // Display username from local storage
+        document.addEventListener('DOMContentLoaded', () => {
+            const usernameDisplay = document.getElementById('username-display');
+            const username = localStorage.getItem('username');
+
+            if (username) {
+                usernameDisplay.textContent = `Hello, ${username}!`;
+            } else {
+                usernameDisplay.textContent = 'Hello, Guest!';
+            }
+        });
+
+        // Function to like a post
+        async function likePost(postId, currentLikes) {
+            const userId = auth.currentUser ? auth.currentUser.uid : null; // Check if user is authenticated
+
+            if (!userId) {
+                alert("You must be logged in to like a post.");
+                return;
+            }
+
+            try {
+                const postRef = doc(firestore, 'posts', postId);
+                const postDoc = await getDoc(postRef);
+
+                if (postDoc.exists()) {
+                    const postData = postDoc.data();
+
+                    if (postData.dislikedBy && postData.dislikedBy.includes(userId)) {
+                        alert("You cannot like a post you have already disliked.");
+                        return;
+                    }
+
+                    if (postData.likedBy && postData.likedBy.includes(userId)) {
+                        alert("You have already liked this post.");
+                        return;
+                    }
+
+                    await updateDoc(postRef, {
+                        likes: currentLikes + 1,
+                        likedBy: arrayUnion(userId)
+                    });
+
+                    fetchPosts();  // Refresh the post list
+                }
+            } catch (error) {
+                console.error("Error liking post: ", error);
+            }
+        }
+
+        // Function to dislike a post
+        async function dislikePost(postId, currentLikes) {
+            const userId = auth.currentUser ? auth.currentUser.uid : null; // Check if user is authenticated
+
+            if (!userId) {
+                alert("You must be logged in to dislike a post.");
+                return;
+            }
+
+            try {
+                const postRef = doc(firestore, 'posts', postId);
+                const postDoc = await getDoc(postRef);
+
+                if (postDoc.exists()) {
+                    const postData = postDoc.data();
+
+                    if (postData.likedBy && postData.likedBy.includes(userId)) {
+                        alert("You cannot dislike a post you have already liked.");
+                        return;
+                    }
+
+                    if (postData.dislikedBy && postData.dislikedBy.includes(userId)) {
+                        alert("You have already disliked this post.");
+                        return;
+                    }
+
+                    await updateDoc(postRef, {
+                        likes: currentLikes - 1,
+                        dislikedBy: arrayUnion(userId)
+                    });
+
+                    fetchPosts();  // Refresh the post list
+                }
+            } catch (error) {
+                console.error("Error disliking post: ", error);
+            }
+        }
+    </script>
+    
+</body>
+
+</html>

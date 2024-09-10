@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tour Guider</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Irish+Grover" />
+</head>
+
+<body>
+    <!-- Navbar Section -->
+    <nav class="navbar">
+        <div class="logohh">
+            <a href="index.html"><img src="logo.png" alt="Logo"></a>
+        </div>
+
+        <ul class="nav-links">
+            <li> <a href="menu.html"><i class='bx bx-menu'></i></a> </li>
+            <li><a class="menu" href="menu.html">MENU</a></li>
+            <li><a class="community" href="community.html">COMMUNITY</a></li>
+            <li><a class="budgetP" href="#">BUDGET PLANNER</a></li>
+
+        </ul>
+        <div class="profile">
+            <div class="username">
+
+                <p id="username-display" >Hello, Guest!</p>
+            </div>
+            <div><img src="bell-regular-24.png" alt="Profile" class="profile-icon"></div>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <div class="search-section">
+            <h1>SEARCH YOUR LOCATION</h1>
+            <input type="text" placeholder="Search Your Location" id="location-input">
+            <div id="suggestions" class="sugge"></div>
+            <i class='bx bxs-edit-location'></i>
+        </div>
+        <p class="quote">Live Every Moment As If It Is Your Last!!</p>
+    </main>
+    
+    <!-- Chatbot Assistant -->
+    <div class="chatbot-assistant">
+        <h3>Chatbot Assistant</h3>
+        <div class="Assistant_logo">
+            <img src="background.jpg" alt="Assistant Logo">
+        </div>
+        <p>How can I help you today?</p>
+        <textarea id="chatbot-input" placeholder="Please enter your query here..."></textarea>
+        <div class="chatbot-buttons">
+            <button onclick="clearChatbot()">Cancel</button>
+            <button onclick="submitChatbot()">Submit</button>
+        </div>
+        <div id="chatbot-response"></div> <!-- Display response here -->
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Get the chatbot input and buttons
+        const chatbotInput = document.getElementById('chatbot-input');
+        const cancelButton = document.querySelector('.chatbot-buttons button:nth-of-type(1)');
+        const submitButton = document.querySelector('.chatbot-buttons button:nth-of-type(2)');
+
+        // Check if the chatbot input exists
+        if (chatbotInput) {
+            chatbotInput.addEventListener('input', function() {
+                console.log("Input detected:", chatbotInput.value);
+            });
+        } else {
+            console.error("Element 'chatbot-input' not found.");
+        }
+
+        // Check if the cancel button exists and add event listener
+        if (cancelButton) {
+            cancelButton.addEventListener('click', function() {
+                clearChatbot();
+            });
+        } else {
+            console.error("Cancel button not found.");
+        }
+
+        // Check if the submit button exists and add event listener
+        if (submitButton) {
+            submitButton.addEventListener('click', function() {
+                submitChatbot();
+            });
+        } else {
+            console.error("Submit button not found.");
+        }
+    });
+
+    // Function to clear the chatbot input
+    function clearChatbot() {
+        const chatbotInput = document.getElementById('chatbot-input');
+        if (chatbotInput) {
+            chatbotInput.value = '';
+        } else {
+            console.error("Element 'chatbot-input' not found for clearing.");
+        }
+    }
+
+    // Function to submit the chatbot query
+    async function submitChatbot() {
+        const chatbotInput = document.getElementById('chatbot-input');
+        if (!chatbotInput) {
+            console.error("Element 'chatbot-input' not found for submission.");
+            return;
+        }
+
+        const query = chatbotInput.value.trim();
+        if (!query) {
+            alert('Please enter a query.');
+            return;
+        }
+
+        const openaiApiKey = 'asst_wKatxflojZHRVshonGFVsX0L';
+
+        try {
+            const response = await fetch('https://api.openai.com/v1/completions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${openaiApiKey}`
+                },
+                body: JSON.stringify({
+                    model: "text-davinci-003", // You can use other models if needed
+                    prompt: query,
+                    max_tokens: 150
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            if (data.choices && data.choices.length > 0) {
+                document.getElementById('chatbot-response').innerHTML = `<p>${data.choices[0].text.trim()}</p>`;
+            } else {
+                document.getElementById('chatbot-response').innerHTML = '<p>No response from the model.</p>';
+            }
+        } catch (error) {
+            console.error('Error fetching response:', error);
+            document.getElementById('chatbot-response').innerHTML = '<p>Error fetching response. Please try again.</p>';
+        }
+    }
+
+    // Script for Location Search
+    const locationInput = document.getElementById('location-input');
+    const suggestions = document.getElementById('suggestions');
+
+    locationInput.addEventListener('input', function () {
+        const query = locationInput.value.trim();
+
+        if (query.length > 2) { // Start searching after 3 characters
+            fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&addressdetails=1&limit=5`)
+                .then(response => response.json())
+                .then(data => {
+                    suggestions.innerHTML = '';
+
+                    if (data.length > 0) {
+                        data.forEach(location => {
+                            const li = document.createElement('li');
+                            li.textContent = location.display_name;
+                            li.addEventListener('click', function () {
+                                const lat = location.lat;
+                                const lon = location.lon;
+                                locationInput.value = location.display_name;
+                                suggestions.innerHTML = '';
+                                window.location.href = `nearbylocation.html?lat=${lat}&lon=${lon}`;
+                            });
+
+                            suggestions.appendChild(li);
+                        });
+                    } else {
+                        suggestions.innerHTML = '<li>No results found</li>';
+                    }
+                })
+                .catch(error => console.error('Error fetching location data:', error));
+        } else {
+            suggestions.innerHTML = '';
+        }
+    });
+
+    // Display username from local storage
+    document.addEventListener('DOMContentLoaded', () => {
+        const usernameDisplay = document.getElementById('username-display');
+        const username = localStorage.getItem('username');
+
+        if (username) {
+            usernameDisplay.textContent = `Hello,${username}!`;
+        } else {
+            usernameDisplay.textContent = 'Hello, Guest!';
+        }
+    });
+    </script>
+</body>
+
+</html>

@@ -1,4 +1,3 @@
-Here's a sample GitHub README for your tour guide web application made with HTML, CSS, JavaScript, and Firebase:
 
 ---
 

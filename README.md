@@ -65,18 +65,6 @@ Replace the Firebase configuration in the project with your own credentials from
 ## Project Structure
 
 ```
-tour-guider-web-app/
-│
-├── index.html              # Main HTML file
-├── css/
-│   └── styles.css          # CSS for styling
-├── js/
-│   ├── main.js             # Main JavaScript file
-│   └── firebase-config.js  # Firebase configuration
-├── images/                 # Image assets
-├── README.md               # Project README
-└── .firebaserc             # Firebase CLI configuration
-```
 
 ## Contributing
 
